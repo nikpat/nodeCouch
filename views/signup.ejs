@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!--[if IE 8]> 				 <html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Foundation 4</title>
+
+  <link rel='stylesheet' href="/stylesheets/normalize.css" />
+  
+  <link rel="stylesheet" href="/stylesheets/foundation.css" />
+  
+
+  <script src="/javascript/vendor/custom.modernizr.js"></script>
+
+</head>
+<body>
+
+	<div class="row">
+		<div class="large-12 columns">
+			<h2>Sign up to Simple CMS</h2>			
+			<hr />
+			
+			<% if (errors) { %>
+        <ul>
+          <% errors.forEach(function(error){ %>
+            <li><%= error.msg %></li>
+          <% }) %>
+        </ul>
+      <% } %>
+			<div class="row">
+  <div class="large-6 columns">
+   <form action="/signup" method="POST">
+    <fieldset>
+     <legend>Register</legend>
+
+     <div class="row">
+    
+      <div class="large-12 columns">
+       <div class="row collapse">
+        <div class="small-3 columns">
+         <span class="prefix radius">Email</span>
+        </div>
+        <div class="small-9 columns">
+         <input type="text" name="email" placeholder="Your email here">
+        </div>
+       </div>
+      </div>
+    
+      <div class="large-12 columns">
+       <div class="row collapse">
+        <div class="small-3 columns">
+         <span class="prefix radius">Password</span>
+        </div>
+        <div class="small-9 columns">
+         <input name="password" type="password" placeholder="Your password here">
+        </div>
+       </div>
+      </div><div class="large-12 columns">
+       <div class="row collapse">
+        <div class="small-3 columns">
+         <span class="prefix radius">Confirm Pass</span>
+        </div>
+        <div class="small-9 columns">
+         <input name="cpassword" type="password" placeholder="Confirm Pass">
+        </div>
+       </div>
+      </div>
+	  <div class="large-12 columns">
+       <div class="row collapse">
+        <div class="small-3 columns">
+         <span class="prefix radius">Username</span>
+        </div>
+        <div class="small-9 columns">
+         <input name="username" type="text" placeholder="Username">
+        </div>
+       </div>
+      </div><div class="large-12 columns">
+       <div class="row collapse">
+        <div class="small-3 columns">
+         <span class="prefix radius">First Name</span>
+        </div>
+        <div class="small-9 columns">
+         <input name="firstname" type="text" placeholder="First Name">
+        </div>
+       </div>
+      </div><div class="large-12 columns">
+       <div class="row collapse">
+        <div class="small-3 columns">
+         <span class="prefix radius">Last Name</span>
+        </div>
+        <div class="small-9 columns">
+         <input name="lastname" type="text" placeholder="Last Name">
+        </div>
+       </div>
+      </div>
+    
+	<div class="large-12 columns">
+       <div class="row collapse">
+          <input type="submit" class="small button" value="register" >
+       </div>
+      </div>
+    
+     </div>
+     
+    </fieldset>
+   </form>
+  </div>
+ </div>
+  
+  
+  <script>
+    $(document).foundation();
+  </script>
+</body>
+</html>

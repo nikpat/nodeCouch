@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!--[if IE 8]> 				 <html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+
+<head>
+	<meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Foundation 4</title>
+
+  <link rel='stylesheet' href="/stylesheets/normalize.css" />
+  
+  <link rel="stylesheet" href="/stylesheets/foundation.css" />
+  
+
+  <script src="/javascript/vendor/custom.modernizr.js"></script>
+
+</head>
+
+<body>
+
+	<div class="row">
+		<div class="large-12 columns">
+			<h2>Welcome to SimpleCMS</h2>
+			<p>This is version 4.1.2.</p>
+			<hr />
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="large-6 columns" style="border-right: 1px solid #dddddd">
+			<form action="/login" method="POST" >
+				<fieldset>
+					<legend>Login form</legend>
+
+					<div class="row">
+				
+						<div class="large-12 columns">
+							<div class="row collapse">
+								<div class="small-3 columns">
+									<span class="prefix radius">Email</span>
+								</div>
+								<div class="small-9 columns">
+									<input type="text" name="email" placeholder="Your email here">
+								</div>
+								
+							</div>
+						</div>
+				
+						<div class="large-12 columns">
+							<div class="row collapse">
+								<div class="small-3 columns">
+									<span class="prefix radius">Password</span>
+								</div>
+								<div class="small-9 columns">
+									<input type="text" name="password" placeholder="Your password here">
+								</div>
+							</div>
+						</div>
+						
+						<div class="large-12 columns">
+							<div class="row collapse">
+								<input type="submit" class="small button" value="Login">
+							</div>
+						</div>
+				
+					</div>
+					
+				</fieldset>
+			</form>
+			<form method="POST" action="/forgotpass">
+				<fieldset>
+					<legend>Forgot password</legend>
+
+					<div class="row">
+				
+						<div class="large-12 columns">
+							<div class="row collapse">
+								<div class="small-3 columns">
+									<span class="prefix radius">Email</span>
+								</div>
+								<div class="small-6 columns">
+									<input name="email" type="text" placeholder="Your email here">
+								</div>
+								<div class="small-3 columns">
+									<input type="submit" class="small button" value="Submit">
+								</div>
+							</div>
+						</div>
+				
+					</div>
+					
+				</fieldset>
+			</form>
+			
+		</div>
+		
+		<div class="large-6 columns" style="text-align: center;padding: 150px 0px;">
+			
+			<a href="/signup" class="large button">Sign up here</a>
+			
+		</div>
+		
+	</div>
+
+<script src="js/foundation.min.js"></script>
+  <!--
+  
+  <script src="js/foundation/foundation.js"></script>
+  
+  <script src="js/foundation/foundation.dropdown.js"></script>
+  
+  <script src="js/foundation/foundation.placeholder.js"></script>
+  
+  <script src="js/foundation/foundation.forms.js"></script>
+  
+  <script src="js/foundation/foundation.alerts.js"></script>
+  
+  <script src="js/foundation/foundation.magellan.js"></script>
+  
+  <script src="js/foundation/foundation.reveal.js"></script>
+  
+  <script src="js/foundation/foundation.tooltips.js"></script>
+  
+  <script src="js/foundation/foundation.clearing.js"></script>
+  
+  <script src="js/foundation/foundation.cookie.js"></script>
+  
+  <script src="js/foundation/foundation.joyride.js"></script>
+  
+  <script src="js/foundation/foundation.orbit.js"></script>
+  
+  <script src="js/foundation/foundation.section.js"></script>
+  
+  <script src="js/foundation/foundation.topbar.js"></script>
+  
+  -->
+  
+  <script>
+    $(document).foundation();
+  </script>
+</body>
+</html>
