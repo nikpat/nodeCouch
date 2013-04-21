@@ -2,11 +2,14 @@
 /**
  * Module dependencies.
  */
+
+var account_email = "nikhil@knaps.in";
+var account_password = "xxx";
 var couchbase = require("couchbase");
 var config = { 
                 "debug" : false,
                 "user" : "admin",
-                "password" : "xxx",// dont forgot to put password
+                "password" : "knaps@123",
                 "hosts" : [ "localhost:8091" ],
                 "bucket" : "default"    
                 };
@@ -24,7 +27,7 @@ couchbase.connect(config, function(err, bucket) {
 			  , user = require('./routes/user')
 			  , http = require('http')
 			  , path = require('path');
-
+			var crypto = require("crypto");
 			var expressValidator = require('express-validator');
 			var app = express();
 
@@ -85,9 +88,14 @@ couchbase.connect(config, function(err, bucket) {
 
 						if(doc){
 
-							if(req.body.email == doc.email && req.body.password == doc.password) {
-
-								res.send("Welcome");
+							if(req.body.email == doc.email && crypto.createHash('sha1').update(req.body.password).digest('hex') == doc.password) {
+								if(doc.account_status != "active"){
+									res.send("Account Inactive Please verify link");
+								}
+								else{
+									res.send("Welcome");
+								}
+								
 
 							}
 							else {
@@ -115,16 +123,16 @@ couchbase.connect(config, function(err, bucket) {
 								var smtpTransport = nodemailer.createTransport("SMTP",{
 								    service: "Gmail",
 								    auth: {
-								        user: "nikhil@knaps.in",
-								        pass: "xxx
+								        user: account_email,
+								        pass: account_password,
 								    }
 								});
 
 
 								// setup e-mail data with unicode symbols
 								var token = parseInt(Math.random()*100000000000);
-								var resetLink = "http://localhost:3000/reset?email="+req.body.email+"&token="+ token;
-								
+								//var resetLink = "http://localhost:3000/reset?email="+req.body.email+"&token="+ token;
+								var resetLink = "http://165.225.132.91:3000/reset?email="+req.body.email+"&token="+ token;
 								var mailOptions = {
 								    from: "Nikhil <foo@blurdybloop.com>", // sender address
 								    to: req.body.email, // list of receivers
@@ -146,7 +154,7 @@ couchbase.connect(config, function(err, bucket) {
 								                    console.log("err");
 								                } else {
 								                	console.log("token added")
-								                    res.send(newdoc);
+								                   
 								                }
 							            	});
 								    }
@@ -167,13 +175,15 @@ couchbase.connect(config, function(err, bucket) {
 			app.all('/signup',function(req,res){
 
 				if(req.method == 'POST'){
-			
+			    var activation_token = parseInt(Math.random()*100000000000);
+			    
 				var newdoc = {
 							email: req.body.email,
-							password: req.body.email,
+							password:crypto.createHash('sha1').update(req.body.password).digest('hex'),
 							username : req.body.username,
 							firstname: req.body.firstname,
 							lastname: req.body.lastname,
+							account_status: activation_token
 						}
 				console.log(newdoc);
 				req.assert('email', 'required').notEmpty();
@@ -198,7 +208,43 @@ couchbase.connect(config, function(err, bucket) {
 					                if (err) {
 					                    console.log("err");
 					                } else {
-					                    res.send(newdoc);
+					                    //res.send(newdoc);
+										var nodemailer = require("nodemailer");
+										var smtpTransport = nodemailer.createTransport("SMTP",{
+										    service: "Gmail",
+										    auth: {
+										        user: account_email,
+										        pass: account_password
+										    }
+										});
+
+
+										// setup e-mail data with unicode symbols
+										
+										var activationLink = "http://165.225.132.91:3000/activate?email="+req.body.email+"&token="+ activation_token;
+										//var activationLink = "http://127.0.0.1:3000/activate?email="+req.body.email+"&token="+ activation_token;
+										var mailOptions = {
+										    from: "Nikhil <foo@blurdybloop.com>", // sender address
+										    to: req.body.email, // list of receivers
+										    subject: "Account Activation", // Subject line
+										    text: "Activation Link link :"+activationLink, // plaintext body
+										    html: "<b>Activation link  :<a href='"+activationLink+"'>Click Here To Activate<a></b>" // html body
+										}
+
+										// send mail with defined transport object
+										smtpTransport.sendMail(mailOptions, function(error, response){
+										    if(error){
+										        console.log(error);
+										    }else{
+										    	res.send("Activation link sent");
+										        console.log("Message sent: " + response.message);										  									        
+										        console.log("Activation Link Sent");
+										    }
+
+										    // if you don't want to use this transport object anymore, uncomment following line
+										    //smtpTransport.close(); // shut down the connection pool, no more messages
+										});
+
 					                }
 				            	});
 							}					
@@ -209,6 +255,37 @@ couchbase.connect(config, function(err, bucket) {
 				else{
 					res.render('signup', { errors:errors });
 				}
+			});
+
+			app.all('/activate',function(req,res){
+					
+						var email = req.query.email;
+						var token = req.query.token;
+						req.session.uemail = email;
+						bucket.get("user_"+email, function(err, doc, meta) {
+							if(doc){
+								if(doc.account_status == token){
+									var newDoc = doc;
+									newDoc.account_status = "active"
+									bucket.set("user_"+email, newDoc, meta, function(err) {
+						                if (err) {
+						                    console.log("err");
+						                } else {
+						                	console.log("Account in active");
+						                	res.send("Account in active");										                    
+						                }
+					            	});
+								}
+								else{
+									res.send("Invalid Link");
+								}
+							}
+							else{
+								res.send("User Not Found")
+							}
+						});
+						
+					
 			});
 
 			app.all('/reset',function(req,res){
@@ -222,7 +299,7 @@ couchbase.connect(config, function(err, bucket) {
 								}
 								else if(doc){
 									var newdoc = doc;
-									newdoc.password = pass;
+									newdoc.password = crypto.createHash('sha1').update(pass).digest('hex');
 									bucket.set("user_"+doc.email, newdoc, meta, function(err) {
 						                if (err) {
 						                    console.log("err");
