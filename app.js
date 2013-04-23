@@ -126,21 +126,26 @@ couchbase.connect(config, function(err, bucket) {
 			}
 
 			app.get('/', function(req,res){
-		        bucket.get("hitcount", function(err, doc, meta) {
-		            // @todo check the error reason!
-		            if (!doc) {
-		                doc = {count:0};
-		            }
-		            doc.count++;		        
-		            console.log("hits", doc.count);
-		            bucket.set("hitcount", doc, meta, function(err) {
-		                if (err) {
-		                    console.log("err");
-		                } else {
-		                    res.render('index', { title: 'Your are visitor no: ' + doc.count });
-		                }
-		            	});
-		        	});	
+				if(req.session.user){
+					res.redirect("/profile")
+				}
+				else{
+			        bucket.get("hitcount", function(err, doc, meta) {
+			            // @todo check the error reason!
+			            if (!doc) {
+			                doc = {count:0};
+			            }
+			            doc.count++;		        
+			            console.log("hits", doc.count);
+			            bucket.set("hitcount", doc, meta, function(err) {
+			                if (err) {
+			                    console.log("err");
+			                } else {
+			                    res.render('index', { title: 'Your are visitor no: ' + doc.count });
+			                }
+			            	});
+			        	});	
+		    	}
 			});
 
 			app.post('/login',function(req,res){
@@ -361,6 +366,11 @@ couchbase.connect(config, function(err, bucket) {
 						});
 						
 					
+			});
+
+			app.all('/logout',function(req,res){
+				delete req.session.user;
+				res.redirect('/')	
 			});
 
 			app.all('/reset',function(req,res){
