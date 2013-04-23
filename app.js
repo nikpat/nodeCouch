@@ -52,7 +52,7 @@ couchbase.connect(config, function(err, bucket) {
 			passport.use(new FacebookStrategy({
 			    clientID: "464918006910398",
 			    clientSecret: "5e0f51ba35e7b7a5bda6ddbd660cc329",
-			    callbackURL: "http://localhost:3000/auth/facebook/callback"
+			    callbackURL: "http://165.225.132.91:3000/auth/facebook/callback"
 			  },
 			  function(accessToken, refreshToken, profile, done) {
 			  	console.log(profile);
@@ -69,8 +69,8 @@ couchbase.connect(config, function(err, bucket) {
 			  var GoogleStrategy = require('passport-google').Strategy;
 
 				passport.use(new GoogleStrategy({
-				    returnURL: 'http://localhost:3000/auth/google/return',
-				    realm: 'http://localhost:3000/'
+				    returnURL: 'http://165.225.132.91:3000/auth/google/return',
+				    realm: 'http://165.225.132.91:3000'
 				  },
 				  function(identifier, profile, done) {
 				  	console.log(profile);
