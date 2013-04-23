@@ -47,15 +47,6 @@ couchbase.connect(config, function(err, bucket) {
 			app.use(passport.initialize());
 			app.use(passport.session()); 
 			app.use(app.router);
-
-			
-			passport.serializeUser(function(user, done) {
-			  done(null, user.id);
-			});
-
-			passport.deserializeUser(function(id, done) {			 
-			    done(err, user);			
-			});
 			
 			var fb_user;
 			passport.use(new FacebookStrategy({
@@ -84,6 +75,7 @@ couchbase.connect(config, function(err, bucket) {
 				  function(identifier, profile, done) {
 				  	console.log(profile);
 				  	fb_user = profile;
+				  	done(err, 'hello');
 				  	/*
 				    User.findOrCreate({ openId: identifier }, function(err, user) {
 				      done(err, user);
@@ -116,6 +108,14 @@ couchbase.connect(config, function(err, bucket) {
 			app.get('/auth/google/return', 
 			  passport.authenticate('google', { successRedirect: '/profile',
 			                                    failureRedirect: '/login' }));
+
+			passport.serializeUser(function(user, done) {
+			  done(null, user);
+			});
+
+			passport.deserializeUser(function(id, done) {			 
+			    done(err, user);			
+			});
 
 
 			app.use(express.static(path.join(__dirname, 'public')));
@@ -451,11 +451,12 @@ couchbase.connect(config, function(err, bucket) {
 					if(req.session.user){
 					res.render('profile',{user:req.session.user});
 					}else{
-						try{
+						//console.log(req.session.user);
+						if(fb_user.displayName){
 							res.send("Welcome : "+ fb_user.displayName );
 							}
-						catch(err){
-							res.send("Welcome : "+ fb_user.name );
+						else{
+							res.send("Welcome : "+ fb_user.name.givenName );
 						}
 
 					}
