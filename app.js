@@ -4,7 +4,7 @@
  */
 
 var account_email = "nikhil@knaps.in";
-var account_password = "xxx";
+var account_password = "knaps@123";
 var couchbase = require("couchbase");
 var config = { 
                 "debug" : false,
@@ -20,7 +20,7 @@ couchbase.connect(config, function(err, bucket) {
 	}
 	else{
 			console.log("connected");
-
+			var fb_profile = undefined ;
 			var util = require('util') 
 			  , express = require('express')
 			  , routes = require('./routes')
@@ -28,6 +28,8 @@ couchbase.connect(config, function(err, bucket) {
 			  , http = require('http')
 			  , path = require('path');
 			var crypto = require("crypto");
+			var passport = require("passport");
+			var FacebookStrategy = require('passport-facebook').Strategy;
 			var expressValidator = require('express-validator');
 			var app = express();
 
@@ -42,9 +44,80 @@ couchbase.connect(config, function(err, bucket) {
 			app.use(express.methodOverride());
 			app.use(express.cookieParser('your secret here'));
 			app.use(express.session());
+			app.use(passport.initialize());
+			app.use(passport.session()); 
 			app.use(app.router);
-			//app.use(bucket);
+
 			
+			passport.serializeUser(function(user, done) {
+			  done(null, user.id);
+			});
+
+			passport.deserializeUser(function(id, done) {			 
+			    done(err, user);			
+			});
+			
+			var fb_user;
+			passport.use(new FacebookStrategy({
+			    clientID: "464918006910398",
+			    clientSecret: "5e0f51ba35e7b7a5bda6ddbd660cc329",
+			    callbackURL: "http://localhost:3000/auth/facebook/callback"
+			  },
+			  function(accessToken, refreshToken, profile, done) {
+			  	console.log(profile);
+			  	done(null, profile);
+			  	fb_user = profile;
+			  	/*			  		
+			    User.findOrCreate(..., function(err, user) {
+			      if (err) { return done(err); }
+			      done(null, user);
+			    }); */
+			  }
+			));
+
+			  var GoogleStrategy = require('passport-google').Strategy;
+
+				passport.use(new GoogleStrategy({
+				    returnURL: 'http://localhost:3000/auth/google/return',
+				    realm: 'http://localhost:3000/'
+				  },
+				  function(identifier, profile, done) {
+				  	console.log(profile);
+				  	fb_user = profile;
+				  	/*
+				    User.findOrCreate({ openId: identifier }, function(err, user) {
+				      done(err, user);
+				    }); */
+				  }
+				));
+			//app.use(bucket);
+			// Redirect the user to Facebook for authentication.  When complete,
+			// Facebook will redirect the user back to the application at
+			//     /auth/facebook/callback
+			app.get('/auth/facebook', passport.authenticate('facebook'));
+
+			// Facebook will redirect the user to this URL after approval.  Finish the
+			// authentication process by attempting to obtain an access token.  If
+			// access was granted, the user will be logged in.  Otherwise,
+			// authentication has failed.
+			app.get('/auth/facebook/callback', 
+			  passport.authenticate('facebook', { successRedirect: '/profile',
+			                                      failureRedirect: '/login' }));
+
+
+			// Redirect the user to Google for authentication.  When complete, Google
+			// will redirect the user back to the application at
+			//     /auth/google/return
+			app.get('/auth/google', passport.authenticate('google'));
+
+			// Google will redirect the user to this URL after authentication.  Finish
+			// the process by verifying the assertion.  If valid, the user will be
+			// logged in.  Otherwise, authentication has failed.
+			app.get('/auth/google/return', 
+			  passport.authenticate('google', { successRedirect: '/profile',
+			                                    failureRedirect: '/login' }));
+
+
 			app.use(express.static(path.join(__dirname, 'public')));
 
 			// development only
@@ -93,7 +166,9 @@ couchbase.connect(config, function(err, bucket) {
 									res.send("Account Inactive Please verify link");
 								}
 								else{
-									res.send("Welcome");
+									console.log(doc)
+									req.session.user = doc;
+									res.redirect('/profile');
 								}
 								
 
@@ -334,6 +409,58 @@ couchbase.connect(config, function(err, bucket) {
 						});
 						
 					}
+			});
+
+			app.all("/profile",function(req,res){
+				if(req.method == "POST"){
+						var newdoc = {
+							username : req.body.username,
+							firstname: req.body.firstname,
+							lastname: req.body.lastname
+						}
+
+						bucket.get("user_"+req.session.user.email, function(err, doc, meta) {
+							if(err){
+								res.send(err);
+							}
+							else if(doc){
+								var newdoc = doc;
+								newdoc.username = req.body.username;
+								newdoc.firstname = req.body.firstname;
+								newdoc.lastname = req.body.lastname;
+								bucket.set("user_"+doc.email, newdoc, meta, function(err) {
+					                if (err) {
+					                    console.log("err");
+					                } else if(newdoc) {
+					                	req.session.user = newdoc ;
+					                	res.render('profile',{user:req.session.user});	
+					                   
+					                }
+
+				            	});
+							}
+							else{
+								console.log("usernotfound");
+								 res.send("usernotfound");
+							}
+
+						});
+
+				}
+				else{
+					if(req.session.user){
+					res.render('profile',{user:req.session.user});
+					}else{
+						try{
+							res.send("Welcome : "+ fb_user.displayName );
+							}
+						catch(err){
+							res.send("Welcome : "+ fb_user.name );
+						}
+
+					}
+				}
+				 
 			});
 
 			http.createServer(app).listen(app.get('port'), function(){
